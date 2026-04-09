@@ -1,0 +1,76 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "RogueInteractionComponent.h"
+
+#include "RogueGameTypes.h"
+#include "Core/RogueInteractionInterface.h"
+#include "Engine/OverlapResult.h"
+
+
+
+URogueInteractionComponent::URogueInteractionComponent()
+{
+	PrimaryComponentTick.bCanEverTick = true;
+	
+}
+void URogueInteractionComponent::Interact()
+{
+	IRogueInteractionInterface* InteractionInterface = Cast<IRogueInteractionInterface>(SelectedActor);
+	if (InteractionInterface)
+	{
+		InteractionInterface->Interact();
+	}
+}
+
+void URogueInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	APlayerController* PC = CastChecked<APlayerController>(GetOwner());
+	
+	FVector Center = PC->GetPawn()->GetActorLocation();
+	
+	DrawDebugBox(GetWorld(), Center, FVector(20.0f), FColor::Red);
+
+	ECollisionChannel CollisionChannel = COLLISION_INTERACTION;
+
+	FCollisionShape Shape;
+	Shape.SetSphere(InteractionRadius);
+
+	TArray<FOverlapResult> Overlaps;
+	GetWorld()->OverlapMultiByChannel(Overlaps, Center, FQuat::Identity, CollisionChannel, Shape);
+
+	AActor* BestActor = nullptr;
+	float HighestDotResult = -1.0;
+
+	for (FOverlapResult& Overlap : Overlaps)
+	{
+		FVector OverlapLocation = Overlap.GetActor()->GetActorLocation();
+		FVector OverlapDirection = (OverlapLocation - Center).GetSafeNormal();
+
+		float DotResult = FVector::DotProduct(OverlapDirection, PC->GetControlRotation().Vector());
+		
+		if (DotResult > HighestDotResult)
+		{
+			BestActor = Overlap.GetActor();
+			HighestDotResult = DotResult;
+		}
+		//for detection
+		DrawDebugBox(GetWorld(), OverlapLocation, FVector(50.0f), FColor::Red);
+		//for checking the result
+		FString DebugString = FString::Printf(TEXT("Dot: %f"), DotResult);
+		//detecting the best actor
+		DrawDebugString(GetWorld(), OverlapLocation, DebugString, nullptr, FColor::White, 0.0f, true);
+	}
+
+	SelectedActor = BestActor;
+	
+	if (BestActor)
+	{
+		
+		DrawDebugBox(GetWorld(), BestActor->GetActorLocation(), FVector(60.0f), FColor::Green);
+	}
+	DrawDebugSphere(GetWorld(), Center, InteractionRadius, 32, FColor::White);
+}
+
