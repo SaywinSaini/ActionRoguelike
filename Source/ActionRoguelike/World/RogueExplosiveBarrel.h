@@ -38,7 +38,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<URadialForceComponent> RadialForceComponent;
 	
-	void ExplosiveTimerElapsed();
+	UFUNCTION(BlueprintCallable)
+	void Explode();
 	
 	void ParticleTimer();
 	bool bExploded = false;

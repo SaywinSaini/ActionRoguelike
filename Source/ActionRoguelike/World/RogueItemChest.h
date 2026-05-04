@@ -34,7 +34,7 @@ class ACTIONROGUELIKE_API ARogueItemChest : public AActor,public IRogueInteracti
 
 public:
 	
-	virtual void Interact() override;
+	void Interact_Implementation();
 	
 	virtual void Tick(float DeltaTime) override;
 	

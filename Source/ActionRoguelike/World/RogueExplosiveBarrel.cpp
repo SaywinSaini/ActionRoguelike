@@ -50,17 +50,26 @@ float ARogueExplosiveBarrel::TakeDamage(float DamageAmount, struct FDamageEvent 
 	LoopedAudioComponent->Play(); 
 	
 	const float ExplosiveDealy = 3.0f;
-	
-	GetWorldTimerManager().SetTimer(ExplosionTimerHandle,this, &ARogueExplosiveBarrel::ExplosiveTimerElapsed,ExplosiveDealy,false);
+	//Timer
+	GetWorldTimerManager().SetTimer(ExplosionTimerHandle,this, &ARogueExplosiveBarrel::Explode,ExplosiveDealy,false);
 	
 	return ActualDamage;
 }
-void ARogueExplosiveBarrel::ExplosiveTimerElapsed()
+void ARogueExplosiveBarrel::Explode()
 {
-	ParticleComponent->DestroyComponent();
-	ParticleComponent=nullptr;
-	LoopedAudioComponent->Stop();
+	bExploded = true;
+	
+	if (ParticleComponent)
+	{
+		ParticleComponent->DestroyComponent();
+		ParticleComponent=nullptr;
+	}
+	if (LoopedAudioComponent)
+	{
+		LoopedAudioComponent->Stop();
+	}
 	RadialForceComponent->FireImpulse();
+	
 	
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this , ExplosionEffect,GetActorLocation());
 	UGameplayStatics::PlaySoundAtLocation(this,ExplosionSound,GetActorLocation(),FRotator::ZeroRotator);
