@@ -3,17 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "RogueProjectile.h"
 #include "RogueProjectileMagic.generated.h"
 
 class UNiagaraSystem;
-class UProjectileMovementComponent;
-class USphereComponent;
 class UNiagaraComponent;
 class UAudioComponent;
 
 UCLASS(Abstract)
-class ACTIONROGUELIKE_API ARogueProjectileMagic : public AActor
+class ACTIONROGUELIKE_API ARogueProjectileMagic : public ARogueProjectile
 {
 	GENERATED_BODY()
 
@@ -27,14 +25,6 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly,Category="Sound")
 	TObjectPtr<USoundBase> ExplosionSound;
-	
-	// sphere ->size ,collision etc
-	UPROPERTY(EditDefaultsOnly,Category="Components");
-	TObjectPtr<USphereComponent> SphereComponent;
-	
-	//sphere-> speed,bounce back etc
-	UPROPERTY(EditDefaultsOnly,Category="Components");
-	TObjectPtr<UProjectileMovementComponent>ProjectileMovementComponent;
 	
 	//Looping component
 	UPROPERTY(EditDefaultsOnly,Category="Components");
