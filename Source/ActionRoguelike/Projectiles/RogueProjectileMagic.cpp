@@ -2,46 +2,21 @@
 
 
 #include "RogueProjectileMagic.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
-#include "Components/AudioComponent.h"
-#include "Components/SphereComponent.h"
-
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
 ARogueProjectileMagic::ARogueProjectileMagic()
 {
-	
-	
-	LoopedNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("LoopedNiagaraComp"));
-	LoopedNiagaraComponent->SetupAttachment(SphereComponent);
-	
-	LoopedAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("LoopedAudioComponent"));
-	LoopedAudioComponent->SetupAttachment(SphereComponent);
-	
-	
-	
-}
-
-void ARogueProjectileMagic::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-	
-	SphereComponent->OnComponentHit.AddDynamic(this,&ARogueProjectileMagic::OnActorHit);
-	
-	SphereComponent->IgnoreActorWhenMoving(GetInstigator(),true);
+ ProjectileMovementComponent->InitialSpeed = 2000.0f;	
 }
 
 void ARogueProjectileMagic::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	FVector HitFromLocation = GetActorRotation().Vector();
+	//keep the base implementation
+	Super::OnActorHit(HitComponent, OtherActor, OtherComp, NormalImpulse, Hit);
 	
-	UGameplayStatics::ApplyPointDamage(OtherActor,10.0f,HitFromLocation,Hit,GetInstigatorController(),this,DmgTypeClass);
+	FVector HitFromDirection = GetActorRotation().Vector();
 	
-    UNiagaraFunctionLibrary::SpawnSystemAtLocation(this , ExplosionEffect,GetActorLocation());
-	
-	UGameplayStatics::PlaySoundAtLocation(this,ExplosionSound,GetActorLocation(),FRotator::ZeroRotator);
-	
-	Destroy();
+	UGameplayStatics::ApplyPointDamage(OtherActor,10.0f,HitFromDirection,Hit,GetInstigatorController(),this,DmgTypeClass);
 }

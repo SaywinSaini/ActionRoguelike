@@ -45,9 +45,14 @@ void ARoguePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	
 	EnhancedInput->BindAction(Input_Look,ETriggerEvent::Triggered,this,&ARoguePlayerCharacter::Look);
 	
-	EnhancedInput->BindAction(Input_PrimaryAttack,ETriggerEvent::Triggered,this,&ARoguePlayerCharacter::PrimaryAttack);
-	
 	EnhancedInput->BindAction(Input_Jump,ETriggerEvent::Triggered,this,&ARoguePlayerCharacter::Jump);
+	
+	EnhancedInput->BindAction(Input_PrimaryAttack,ETriggerEvent::Triggered,this,&ARoguePlayerCharacter::StartProjectileAttack,PrimaryAttackProjectileClass);
+	
+	EnhancedInput->BindAction(Input_SecondaryAttack,ETriggerEvent::Triggered,this,&ARoguePlayerCharacter::StartProjectileAttack,SecondaryAttackProjectileClass);
+	
+	EnhancedInput->BindAction(Input_SpecialAttack,ETriggerEvent::Triggered,this,&ARoguePlayerCharacter::StartProjectileAttack,SpecialAttackProjectileClass);
+	
 }
 
 
@@ -74,7 +79,7 @@ void ARoguePlayerCharacter::Look(const FInputActionInstance& InValue)
 }
 
 
-void ARoguePlayerCharacter::PrimaryAttack()
+void ARoguePlayerCharacter::StartProjectileAttack(TSubclassOf<ARogueProjectile> ProjectileClass)
 {
 	PlayAnimMontage(AttackMontage);
 	
@@ -87,13 +92,17 @@ void ARoguePlayerCharacter::PrimaryAttack()
 	
 	UGameplayStatics::PlaySound2D(this,CastingSound);
 	
-	GetWorldTimerManager().SetTimer(AttackTimerHandle,this, &ARoguePlayerCharacter::AttackTimerElapsed,AttackDelayTime);
+	//Passing in the projectile as the parameter
+	FTimerDelegate Delegate;
+	Delegate.BindUObject(this,&ARoguePlayerCharacter::AttackTimerElapsed,ProjectileClass);
+	GetWorldTimerManager().SetTimer(AttackTimerHandle,Delegate,AttackDelayTime,false);
 }
 
-void ARoguePlayerCharacter::AttackTimerElapsed()
+void ARoguePlayerCharacter::AttackTimerElapsed(TSubclassOf<ARogueProjectile> ProjectileClass)
 {
 	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
 	FRotator SpawnRotation = GetControlRotation();
+	
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Instigator = this;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -103,9 +112,3 @@ void ARoguePlayerCharacter::AttackTimerElapsed()
 	MoveIgnoreActorAdd(NewProjectile);
 }
 
-// Called every frame
-void ARoguePlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}

@@ -6,10 +6,12 @@
 #include "GameFramework/Actor.h"
 #include "RogueProjectile.generated.h"
 
+class UNiagaraSystem;
+class UNiagaraComponent;
 class UProjectileMovementComponent;
 class USphereComponent;
 
-UCLASS()
+UCLASS(Abstract)
 class ACTIONROGUELIKE_API ARogueProjectile : public AActor
 {
 	GENERATED_BODY()
@@ -17,14 +19,34 @@ class ACTIONROGUELIKE_API ARogueProjectile : public AActor
 protected:
 	
 	// sphere ->size ,collision etc
-	UPROPERTY(EditDefaultsOnly,Category="Components");
+	UPROPERTY(EditDefaultsOnly,Category="Components")
 	TObjectPtr<USphereComponent> SphereComponent;
 	
 	//sphere-> speed,bounce back etc
-	UPROPERTY(EditDefaultsOnly,Category="Components");
+	UPROPERTY(EditDefaultsOnly,Category="Components")
 	TObjectPtr<UProjectileMovementComponent>ProjectileMovementComponent;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Components")
+	TObjectPtr<UNiagaraComponent> LoopedNiagaraComponent;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Components")
+	TObjectPtr<UAudioComponent> LoopedAudioComponent;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Effects")
+	TObjectPtr<UNiagaraSystem> ExplosionEffect;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Sound");
+	TObjectPtr<USoundBase> ExplosionSound;
+	
+	UFUNCTION()
+	virtual void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,UPrimitiveComponent* OtherComp,FVector NormalImpulse,const FHitResult& Hit);
+	
+	void PlayExplodeEffect();
 	
 public:
 	
+	virtual void PostInitializeComponents() override;
+	
 	ARogueProjectile();
+	
 };
