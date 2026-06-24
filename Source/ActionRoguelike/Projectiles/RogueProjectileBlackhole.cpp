@@ -14,7 +14,7 @@ ARogueProjectileBlackhole::ARogueProjectileBlackhole()
 	RadialForceComponent->ForceStrength = -800000.0f;
 	RadialForceComponent->Radius = 1200.0f;
 	
-	//Avoid sucking playr into the blackhole
+	//Avoid sucking player into the blackhole
 	RadialForceComponent->RemoveObjectTypeToAffect(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 	
 	// suck up nearby objects, small enough to let them miss the sphere and flail around a bit first

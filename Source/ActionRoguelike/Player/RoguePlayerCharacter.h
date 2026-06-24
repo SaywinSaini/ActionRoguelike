@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "RoguePlayerCharacter.generated.h"
 
+class URogueActionSystemComponent;
 class ARogueProjectile;
 class UNiagaraSystem;
 class ARogueProjectileMagic;
@@ -66,11 +67,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	TObjectPtr<UInputAction> Input_SpecialAttack;
 	
-    UPROPERTY(VisibleAnywhere,Category="Components");
+    UPROPERTY(VisibleAnywhere,Category="Components")
 	TObjectPtr<UCameraComponent> CameraComponent;
 	
-	UPROPERTY(VisibleAnywhere,Category="Components)")
+	UPROPERTY(VisibleAnywhere,Category="Components")
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
+	
+	UPROPERTY(VisibleAnywhere,Category="Components")
+	TObjectPtr<URogueActionSystemComponent> ActionSystemComponent;
 	
 	
 	// Called when the game starts or when spawned
@@ -86,6 +90,8 @@ protected:
 	
 public:	
 
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

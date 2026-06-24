@@ -6,6 +6,7 @@
 #include "Projectiles/RogueProjectileMagic.h"
 #include "EnhancedInputComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "ActionSystem/RogueActionSystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -23,6 +24,8 @@ ARoguePlayerCharacter::ARoguePlayerCharacter()
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
+	
+	ActionSystemComponent = CreateDefaultSubobject<URogueActionSystemComponent>(TEXT("ActionSystemComp"));
 	
 	MuzzleSocketName = "Muzzle_01";
 }
@@ -96,6 +99,16 @@ void ARoguePlayerCharacter::StartProjectileAttack(TSubclassOf<ARogueProjectile> 
 	FTimerDelegate Delegate;
 	Delegate.BindUObject(this,&ARoguePlayerCharacter::AttackTimerElapsed,ProjectileClass);
 	GetWorldTimerManager().SetTimer(AttackTimerHandle,Delegate,AttackDelayTime,false);
+}
+
+float ARoguePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+	AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	ActionSystemComponent->ApplyHealthChange(-ActualDamage);
+	
+	return ActualDamage;
 }
 
 void ARoguePlayerCharacter::AttackTimerElapsed(TSubclassOf<ARogueProjectile> ProjectileClass)
