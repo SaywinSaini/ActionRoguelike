@@ -49,6 +49,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly,Category="PrimaryAttack")
 	TObjectPtr<UAnimMontage> AttackMontage;
 	
+	UPROPERTY(EditDefaultsOnly,Category="Death")
+	TObjectPtr<UAnimMontage> DeathMontage;
+	
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	TObjectPtr<UInputAction> Input_Move;
 	
@@ -76,10 +79,6 @@ protected:
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Components")
 	TObjectPtr<URogueActionSystemComponent> ActionSystemComponent;
 	
-	
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	void Move(const FInputActionValue& InValue);
 	
 	void Look(const FInputActionInstance& InValue);
@@ -88,9 +87,14 @@ protected:
 	
 	void StartProjectileAttack(TSubclassOf<ARogueProjectile> ProjectileClass);
 	
+	UFUNCTION()
+	void OnHealthChanged(float NewHealth , float OldHealth);
+	
 public:	
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	
+	void PostInitializeComponents() override;
 	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

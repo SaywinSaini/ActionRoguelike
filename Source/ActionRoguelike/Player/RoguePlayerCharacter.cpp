@@ -8,6 +8,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "ActionSystem/RogueActionSystemComponent.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -30,12 +31,13 @@ ARoguePlayerCharacter::ARoguePlayerCharacter()
 	MuzzleSocketName = "Muzzle_01";
 }
 
-// Called when the game starts or when spawned
-void ARoguePlayerCharacter::BeginPlay()
+void ARoguePlayerCharacter::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
 	
+	ActionSystemComponent->OnHealthChanged.AddDynamic(this, &ARoguePlayerCharacter::OnHealthChanged);
 }
+
 
 // Called to bind functionality to input
 void ARoguePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -101,16 +103,6 @@ void ARoguePlayerCharacter::StartProjectileAttack(TSubclassOf<ARogueProjectile> 
 	GetWorldTimerManager().SetTimer(AttackTimerHandle,Delegate,AttackDelayTime,false);
 }
 
-float ARoguePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
-	AController* EventInstigator, AActor* DamageCauser)
-{
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	
-	ActionSystemComponent->ApplyHealthChange(-ActualDamage);
-	
-	return ActualDamage;
-}
-
 void ARoguePlayerCharacter::AttackTimerElapsed(TSubclassOf<ARogueProjectile> ProjectileClass)
 {
 	FVector SpawnLocation = GetMesh()->GetSocketLocation(MuzzleSocketName);
@@ -124,4 +116,29 @@ void ARoguePlayerCharacter::AttackTimerElapsed(TSubclassOf<ARogueProjectile> Pro
 	
 	MoveIgnoreActorAdd(NewProjectile);
 }
+
+void ARoguePlayerCharacter::OnHealthChanged(float NewHealth, float OldHealth)
+{
+	//Died?
+	if (FMath::IsNearlyZero(NewHealth))
+	{
+		DisableInput(nullptr);
+		
+		GetMovementComponent()->StopMovementImmediately();
+		
+		PlayAnimMontage(DeathMontage);
+	}
+}
+
+float ARoguePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+	AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	ActionSystemComponent->ApplyHealthChange(-ActualDamage);
+	
+	return ActualDamage;
+}
+
+
 
