@@ -13,7 +13,6 @@ ARoguePlayerController::ARoguePlayerController()
 {
 	InteractionComponent = CreateDefaultSubobject<URogueInteractionComponent>(TEXT("InteractionComponent"));
 	
-	
 }
 
 void ARoguePlayerController::SetupInputComponent()
